@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     
@@ -36,6 +36,32 @@ class TestLeafNode(unittest.TestCase):
         node = LeafNode("img", "Image", {"src": "image.png", "alt": "An image"})
         self.assertEqual(node.to_html(), '<img src="image.png" alt="An image">Image</img>')
 
+
+from htmlnode import ParentNode, LeafNode
+
+class TestParentNode(unittest.TestCase):
+    def test_parent_node_with_children(self):
+        child1 = LeafNode("p", "First paragraph.")
+        child2 = LeafNode("p", "Second paragraph.")
+        parent = ParentNode("div", [child1, child2])
+        expected = "<div><p>First paragraph.</p><p>Second paragraph.</p></div>"
+        self.assertEqual(parent.to_html(), expected)
+
+    def test_parent_node_with_props(self):
+        child = LeafNode("span", "Some text")
+        parent = ParentNode("div", [child], {"class": "container"})
+        expected = '<div class="container"><span>Some text</span></div>'
+        self.assertEqual(parent.to_html(), expected)
+
+    def test_parent_node_missing_tag(self):
+        with self.assertRaises(ValueError) as context:
+            ParentNode(None, [LeafNode("p", "Text")])
+        self.assertIn("tag", str(context.exception).lower())
+
+    def test_parent_node_missing_children(self):
+        with self.assertRaises(ValueError) as context:
+            ParentNode("div", [])
+        self.assertIn("children", str(context.exception).lower())
 
 
 if __name__ == "__main__":
